@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>{name}</title>
+</head>
+
+<body>
+<p><img src="images/{image}" /></p>
+<p><b>Image tags:</b> {tags}</p>
+<p>+ {likes} / - {dislikes}</p>
+<form action="?module=vote" method="POST" enctype="multipart/form-data">
+<input type="hidden" name="image" value="{id}" />
+<input type="hidden" name="like" value="true" />
+<input type="submit" value="Like" />
+</form>
+
+<form action="?module=vote" method="POST" enctype="multipart/form-data">
+<input type="hidden" name="image" value="{id}" />
+<input type="hidden" name="like" value="false" />
+<input type="submit" value="Dislike" />
+</form>
+
+<p><a href="./">Home</a></p>
+<p><a href="?module=upload">Upload an image</a></p>
+<p><a href="?module=random">Random Image</a></p>
+</body>
+</html>

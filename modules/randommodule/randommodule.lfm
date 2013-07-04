@@ -1,0 +1,3 @@
+object ARandomModule : TRandomModule
+	OnRequest = ModuleRequest
+end
