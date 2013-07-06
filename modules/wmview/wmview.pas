@@ -1,4 +1,4 @@
-unit ViewImageModule;
+unit WmView;
 
 {$mode objfpc}
 {$H+}
@@ -6,35 +6,36 @@ unit ViewImageModule;
 interface
 
 uses
-	HTTPDefs,
-	fpHTTP,
-	fpWeb,
-
+	HttpDefs,
+	FpHttp,
+	FpWeb,
 	Classes;
 
 type
-	TViewImageModule = class(TFPWebModule)
-		procedure ModuleRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+	TViewImageModule = class(TFpWebModule)
 	private
-		FImage         : String;
-		FImageId       : String;
-		FImageName     : String;
+		FImage         : string;
+		FImageId       : string;
+		FImageName     : string;
 		FImageTags     : TStringList;
 		FImageLikes    : Integer;
 		FImageDislikes : Integer;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
+
+	published
+		procedure Request(
+			Sender     : TObject;
+			ARequest   : TRequest;
+			AResponse  : TResponse;
+			var Handle : Boolean);
 	end;
 
 var
-	AViewImageModule : TViewImageModule;
+	ViewImageModule : TViewImageModule;
 
 implementation
 
@@ -44,13 +45,13 @@ uses
 	SysUtils,
 	IniFiles;
 
-procedure TViewImageModule.ModuleRequest(
+procedure TViewImageModule.Request(
 	Sender     : TObject;
 	ARequest   : TRequest;
 	AResponse  : TResponse;
 	var Handle : Boolean);
 var
-	Id      : String;
+	Id      : string;
 	Info    : TSearchRec;	
 	Ini     : TIniFile;
 
@@ -99,11 +100,11 @@ end;
 
 procedure TViewImageModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
-	case LowerCase(TagString) of
+	case TagString of
 		'image'    : ReplaceText := FImage;
 		'name'     : ReplaceText := FImageName;
 		'likes'    : ReplaceText := IntToStr(FImageLikes);
@@ -114,5 +115,5 @@ begin
 end;
 
 initialization
-	RegisterHTTPModule('view', TViewImageModule)
+	RegisterHttpModule('view', TViewImageModule)
 end.

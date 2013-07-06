@@ -1,4 +1,4 @@
-unit AddVoteModule;
+unit WmAddVote;
 
 {$mode objfpc}
 {$H+}
@@ -6,30 +6,31 @@ unit AddVoteModule;
 interface
 
 uses
-	HTTPDefs,
-	fpHTTP,
-	fpWeb,
+	HttpDefs,
+	FpHttp,
+	FpWeb,
 	
 	Classes;
 
 type
-	TAddVoteModule = class(TFPWebModule)
-		procedure ModuleRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+	TAddVoteModule = class(TFpWebModule)
 	private
-		FImageId : String;
+		FImageId : string;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
+	published
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AnAddVoteModule : TAddVoteModule;
+	AddVoteModule : TAddVoteModule;
 
 implementation
 
@@ -39,17 +40,28 @@ uses
 	SysUtils,
 	IniFiles;
 
-procedure TAddVoteModule.ModuleRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
+procedure TAddVoteModule.ReplaceTags(
+	Sender          : TObject;
+	const TagString : string;
+	TagParams       : TStringList;
+	out ReplaceText : string);
+begin
+	case TagString of
+		'id' : ReplaceText := FImageId
+	end
+end;
+
+procedure TAddVoteModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
 var
 	Like     : Boolean;
 	Likes    : TIniFile;
 	Dislikes : TIniFile;
 	Ini      : TIniFile;
-	VoterIp  : String;
+	VoterIp  : string;
 	List     : TStringList;
 begin
 	Like := not (ARequest.ContentFields.Values['like'] = 'false');
@@ -89,20 +101,9 @@ begin
 
 	AResponse.Content := ModuleTemplate.GetContent;
 
-	Handle := True
-end;
-
-procedure TAddVoteModule.ReplaceTags(
-	Sender          : TObject;
-	const TagString : String;
-	TagParams       : TStringList;
-	out ReplaceText : String);
-begin
-	case LowerCase(TagString) of
-		'id' : ReplaceText := FImageId
-	end
+	Handled := True
 end;
 
 initialization
-	RegisterHTTPModule('vote', TAddVoteModule)
+	RegisterHttpModule('vote', TAddVoteModule)
 end.

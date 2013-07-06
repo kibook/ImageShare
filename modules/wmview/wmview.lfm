@@ -1,0 +1,3 @@
+object ViewImageModule : TViewImageModule
+	OnRequest = Request
+end

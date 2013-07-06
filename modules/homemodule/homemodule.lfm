@@ -1,3 +1,0 @@
-object AHomeModule : THomeModule
-	OnRequest = ModuleRequest
-end

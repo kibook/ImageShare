@@ -5,12 +5,12 @@ uses
 	IniFiles,
 
 	{ Modules }
-	ViewImageModule,
-	AddVoteModule,
-	UploadModule,
-	HomeModule,
-	RandomModule,
-	SearchModule;
+	WmView,
+	WmAddVote,
+	WmUpload,
+	WmHome,
+	WmRandom,
+	WmSearch;
 
 var
 	Ini : TIniFile;

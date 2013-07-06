@@ -1,4 +1,4 @@
-unit UploadModule;
+unit WmUpload;
 
 {$mode objfpc}
 {$H+}
@@ -6,30 +6,30 @@ unit UploadModule;
 interface
 
 uses
-	HTTPDefs,
-	fpHTTP,
-	fpWeb,
-
+	HttpDefs,
+	FpHttp,
+	FpWeb,
 	Classes;
 
 type
-	TUploadModule = class(TFPWebModule)
-		procedure ModuleRequest(
+	TUploadModule = class(TFpWebModule)
+	private
+		FImageId : string;
+		procedure ReplaceTags(
+			Sender          : TObject;
+			const TagString : string;
+			TagParams       : TStringList;
+			out ReplaceText : string);
+	published
+		procedure Request(
 			Sender     : TObject;
 			ARequest   : TRequest;
 			AResponse  : TResponse;
 			var Handle : Boolean);
-	private
-		FImageId : String;
-		procedure ReplaceTags(
-			Sender          : TObject;
-			const TagString : String;
-			TagParams       : TStringList;
-			out ReplaceText : String);
 	end;
 
 var
-	AnUploadModule : TUploadModule;
+	UploadModule : TUploadModule;
 
 implementation
 
@@ -39,15 +39,15 @@ uses
 	SysUtils,
 	IniFiles;
 
-procedure TUploadModule.ModuleRequest(
+procedure TUploadModule.Request(
 	Sender     : TObject;
 	ARequest   : TRequest;
 	AResponse  : TResponse;
 	var Handle : Boolean);
 var
-	Temp        : String;
-	Extension   : String;
-	ImageName   : String;
+	Temp        : string;
+	Extension   : string;
+	ImageName   : string;
 	ImageTags   : TStringList;
 	Count       : Integer = 0;
 	i           : Integer;
@@ -90,7 +90,7 @@ begin
 	ModuleTemplate.FileName := 'templates/pages/upload/bad.htm'
 end;
 
-function CleanText(Raw : String) : String;
+function CleanText(Raw : string) : string;
 const
 	ValidChars = ['a'..'z', 'A'..'Z', ' '];
 
@@ -153,15 +153,15 @@ end;
 
 procedure TUploadModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 begin
-	case LowerCase(TagString) of
+	case TagString of
 		'id' : ReplaceText := FImageId
 	end
 end;
 
 initialization
-	RegisterHTTPModule('upload', TUploadModule)
+	RegisterHttpModule('upload', TUploadModule)
 end.

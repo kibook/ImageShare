@@ -1,4 +1,4 @@
-unit HomeModule;
+unit WmHome;
 
 {$mode objfpc}
 {$H+}
@@ -6,29 +6,30 @@ unit HomeModule;
 interface
 
 uses
-	HTTPDefs,
-	FPHTTP,
-	FPWeb,
+	HttpDefs,
+	FpHttp,
+	FpWeb,
 
 	Classes;
 
 type
-	THomeModule = class(TFPWebModule)
-		procedure ModuleRequest(
-			Sender : TObject;
-			ARequest : TRequest;
-			AResponse : TResponse;
-			var Handle : Boolean);
+	THomeModule = class(TFpWebModule)
 	private
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
+	published
+		procedure Request(
+			Sender      : TObject;
+			ARequest    : TRequest;
+			AResponse   : TResponse;
+			var Handled : Boolean);
 	end;
 
 var
-	AHomeModule : THomeModule;
+	HomeModule : THomeModule;
 
 implementation
 
@@ -42,7 +43,7 @@ var
 	Ini : TIniFile;
 
 function SortImages(
-	List : TStringList;
+	List   : TStringList;
 	Index1 : Integer;
 	Index2 : Integer
 ) : Integer;
@@ -51,28 +52,13 @@ begin
 		  StrToInt(Ini.ReadString('likes', List[Index2], '0'))
 end;
 
-procedure THomeModule.ModuleRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
-begin
-	ModuleTemplate.FileName := 'templates/pages/home.htm';
-	ModuleTemplate.AllowTagParams := True;
-	ModuleTemplate.OnReplaceTag := @ReplaceTags;
-
-	AResponse.Content := ModuleTemplate.GetContent;
-
-	Handle := True
-end;
-
 procedure THomeModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String);
+	out ReplaceText : string);
 
-function GetTopImages : String;
+function GetTopImages : string;
 var
 	Images    : TStringList;
 	Content   : TStringList;
@@ -96,28 +82,43 @@ begin
 	for i := TopImages to Images.Count - 1 do
 		Images.Delete(i);
 
-	Result := Result + '<table>'#13#10;
+	Result := Result + '<table>'+ LineEnding;
 
 	for i := 0 to Images.Count - 1 do
 	begin
 		if i mod 4 = 0 then
-			Result := Result + '<tr>'#13#10;
+			Result := Result + '<tr>' + LineEnding;
 
 		Result := Result + Format(Content.Text, [i, i]);
 
 		if (i mod 4 = 3) or (i = Images.Count - 1) then
-			Result := Result + '</tr>'#13#10
+			Result := Result + '</tr>' + LineEnding
 	end;
 
 	Result := Result + '</table>'
 end;
 
 begin
-	case LowerCase(TagString) of
+	case TagString of
 		'topimages' : ReplaceText := GetTopImages
 	end
 end;
 
+procedure THomeModule.Request(
+	Sender      : TObject;
+	ARequest    : TRequest;
+	AResponse   : TResponse;
+	var Handled : Boolean);
+begin
+	ModuleTemplate.FileName := 'templates/pages/home.htm';
+	ModuleTemplate.AllowTagParams := True;
+	ModuleTemplate.OnReplaceTag := @ReplaceTags;
+
+	AResponse.Content := ModuleTemplate.GetContent;
+
+	Handled := True
+end;
+
 initialization
-	RegisterHTTPModule('', THomeModule)
+	RegisterHttpModule('', THomeModule)
 end.

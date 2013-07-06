@@ -1,3 +1,0 @@
-object AnUploadModule : TUploadModule
-	OnRequest = ModuleRequest
-end

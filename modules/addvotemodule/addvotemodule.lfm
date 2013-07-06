@@ -1,3 +1,0 @@
-object AnAddVoteModule : TAddVoteModule
-	OnRequest = ModuleRequest
-end

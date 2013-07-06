@@ -1,4 +1,4 @@
-unit SearchModule;
+unit WmSearch;
 
 {$mode objfpc}
 {$H+}
@@ -6,29 +6,30 @@ unit SearchModule;
 interface
 
 uses
-	HTTPDefs,
-	FPHTTP,
-	FPWeb,
+	HttpDefs,
+	FpHttp,
+	FpWeb,
 	Classes;
 
 type
-	TSearchModule = class(TFPWebModule)
-		procedure ModuleRequest(
-			Sender     : TObject;
-			ARequest   : TRequest;
-			AResponse  : TResponse;
-			var Handle : Boolean);
+	TSearchModule = class(TFpWebModule)
 	private
 		FKeywords : TStringList;
 		procedure ReplaceTags(
 			Sender          : TObject;
-			const TagString : String;
+			const TagString : string;
 			TagParams       : TStringList;
-			out ReplaceText : String);
+			out ReplaceText : string);
+	published
+		procedure Request(
+			Sender     : TObject;
+			ARequest   : TRequest;
+			AResponse  : TResponse;
+			var Handle : Boolean);
 	end;
 
 var
-	ASearchModule : TSearchModule;
+	SearchModule : TSearchModule;
 
 implementation
 
@@ -38,47 +39,13 @@ uses
 	SysUtils,
 	IniFiles;
 
-procedure TSearchModule.ModuleRequest(
-	Sender     : TObject;
-	ARequest   : TRequest;
-	AResponse  : TResponse;
-	var Handle : Boolean);
-var
-	Query : String;
-begin
-	Query := Trim(ARequest.QueryFields.Values['q']);
-
-	FKeywords := TStringList.Create;	
-
-	if not (Query = '') then
-	begin
-		FKeywords.Delimiter := ' ';
-		FKeywords.DelimitedText := Query;
-
-		ModuleTemplate.FileName :=
-			'templates/pages/search/results.htm'
-	end
-	else
-		ModuleTemplate.FileName :=
-			'templates/pages/search/search.htm';
-
-	ModuleTemplate.AllowTagParams := True;
-	ModuleTemplate.OnReplaceTag := @ReplaceTags;
-
-	AResponse.Content := ModuleTemplate.GetContent;
-	
-	Handle := True;
-
-	FKeywords.Free
-end;
-
 procedure TSearchModule.ReplaceTags(
 	Sender          : TObject;
-	const TagString : String;
+	const TagString : string;
 	TagParams       : TStringList;
-	out ReplaceText : String); 
+	out ReplaceText : string); 
 
-function GetSearchResults : String;
+function GetSearchResults : string;
 var
 	Tags    : TStringList;
 	Images  : TStringList;
@@ -90,7 +57,7 @@ var
 function ImageMatchesQuery : Boolean;
 var
 	Tags      : TStringList;
-	ImageName : String;
+	ImageName : string;
 	m         : Integer;
 	n         : Integer;
 begin
@@ -122,12 +89,12 @@ begin
 
 	Result := '';
 
-	Result := Result + '<table>'#13#10;
+	Result := Result + '<table>' + LineEnding;
 
 	for i := 0 to Images.Count - 1 do
 	begin
 		if k mod 4 = 0 then
-			Result := Result + '<tr>'#13#10;
+			Result := Result + '<tr>' + LineEnding;
 
 		if ImageMatchesQuery then
 		begin
@@ -136,7 +103,7 @@ begin
 		end;
 
 		if (k mod 4 = 3) or (i = Images.Count - 1) then
-			Result := Result + '</tr>'#13#10
+			Result := Result + '</tr>' + LineEnding
 	end;
 	
 	Content.Free;
@@ -145,12 +112,46 @@ begin
 end;
 
 begin
-	case LowerCase(TagString) of
+	case TagString of
 		'query'   : ReplaceText := FKeywords.Text;
 		'results' : ReplaceText := GetSearchResults
 	end
 end;
 
+procedure TSearchModule.Request(
+	Sender     : TObject;
+	ARequest   : TRequest;
+	AResponse  : TResponse;
+	var Handle : Boolean);
+var
+	Query : string;
+begin
+	Query := Trim(ARequest.QueryFields.Values['q']);
+
+	FKeywords := TStringList.Create;	
+
+	if not (Query = '') then
+	begin
+		FKeywords.Delimiter := ' ';
+		FKeywords.DelimitedText := Query;
+
+		ModuleTemplate.FileName :=
+			'templates/pages/search/results.htm'
+	end
+	else
+		ModuleTemplate.FileName :=
+			'templates/pages/search/search.htm';
+
+	ModuleTemplate.AllowTagParams := True;
+	ModuleTemplate.OnReplaceTag := @ReplaceTags;
+
+	AResponse.Content := ModuleTemplate.GetContent;
+	
+	Handle := True;
+
+	FKeywords.Free
+end;
+
 initialization
-	RegisterHTTPModule('search', TSearchModule)
+	RegisterHttpModule('search', TSearchModule)
 end.

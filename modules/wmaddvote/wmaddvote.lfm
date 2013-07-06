@@ -1,0 +1,3 @@
+object AddVoteModule : TAddVoteModule
+	OnRequest = Request
+end
